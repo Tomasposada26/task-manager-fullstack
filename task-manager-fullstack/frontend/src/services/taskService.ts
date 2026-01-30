@@ -19,3 +19,28 @@ export const fetchTasks = async (status?: string, priority?: string): Promise<Ta
   if (!res.ok) throw new Error('Failed to fetch tasks');
   return res.json();
 };
+
+export const createTask = async (task: Partial<Task>): Promise<Task> => {
+  const res = await authFetch('/api/tasks', {
+    method: 'POST',
+    body: JSON.stringify(task),
+  });
+  if (!res.ok) throw new Error('Failed to create task');
+  return res.json();
+};
+
+export const updateTask = async (id: string, task: Partial<Task>): Promise<Task> => {
+  const res = await authFetch(`/api/tasks/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(task),
+  });
+  if (!res.ok) throw new Error('Failed to update task');
+  return res.json();
+};
+
+export const deleteTask = async (id: string): Promise<void> => {
+  const res = await authFetch(`/api/tasks/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error('Failed to delete task');
+};
