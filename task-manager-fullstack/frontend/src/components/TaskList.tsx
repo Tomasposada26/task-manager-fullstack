@@ -30,6 +30,7 @@ const TaskList: React.FC = () => {
   const [form, setForm] = useState<Partial<Task>>(initialForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const loadTasks = async () => {
     setLoading(true);
@@ -56,6 +57,7 @@ const TaskList: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
+    setSuccessMsg(null);
     if (!form.title || form.title.length < 3) {
       setFormError('Title is required and must be at least 3 characters.');
       return;
@@ -63,8 +65,10 @@ const TaskList: React.FC = () => {
     try {
       if (editingId) {
         await updateTask(editingId, form);
+        setSuccessMsg('Task updated successfully!');
       } else {
         await createTask(form);
+        setSuccessMsg('Task created successfully!');
       }
       setForm(initialForm);
       setEditingId(null);
@@ -83,12 +87,15 @@ const TaskList: React.FC = () => {
       dueDate: task.dueDate ? task.dueDate.slice(0, 10) : '',
     });
     setEditingId(task._id);
+    setFormError(null);
+    setSuccessMsg(null);
   };
 
   const handleDelete = async (id: string) => {
     if (!window.confirm('Delete this task?')) return;
     try {
       await deleteTask(id);
+      setSuccessMsg('Task deleted successfully!');
       loadTasks();
     } catch (err: any) {
       setError(err.message || 'Error deleting task');
@@ -154,6 +161,7 @@ const TaskList: React.FC = () => {
         <button type="submit" style={{ flex: 1, minWidth: 80 }}>{editingId ? 'Update' : 'Add'} Task</button>
         {editingId && <button type="button" onClick={() => { setForm(initialForm); setEditingId(null); }} style={{ flex: 1, minWidth: 80 }}>Cancel</button>}
         {formError && <span style={{ color: 'red', marginLeft: 8 }}>{formError}</span>}
+        {successMsg && <span style={{ color: 'green', marginLeft: 8 }}>{successMsg}</span>}
       </form>
       {loading && <div>Loading...</div>}
       {error && <div style={{ color: 'red' }}>{error}</div>}
