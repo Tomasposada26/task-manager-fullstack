@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { fetchTasks, createTask, updateTask, deleteTask, Task } from '../services/taskService';
+import { useNotification } from '../hooks/useNotification';
 
 const initialForm: Partial<Task> = {
   title: '',
@@ -31,6 +32,7 @@ const TaskList: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const { show } = useNotification();
 
   const loadTasks = async () => {
     setLoading(true);
@@ -60,21 +62,25 @@ const TaskList: React.FC = () => {
     setSuccessMsg(null);
     if (!form.title || form.title.length < 3) {
       setFormError('Title is required and must be at least 3 characters.');
+      show('Title is required and must be at least 3 characters.', 'error');
       return;
     }
     try {
       if (editingId) {
         await updateTask(editingId, form);
         setSuccessMsg('Task updated successfully!');
+        show('Task updated successfully!', 'success');
       } else {
         await createTask(form);
         setSuccessMsg('Task created successfully!');
+        show('Task created successfully!', 'success');
       }
       setForm(initialForm);
       setEditingId(null);
       loadTasks();
     } catch (err: any) {
       setFormError(err.message || 'Error saving task');
+      show(err.message || 'Error saving task', 'error');
     }
   };
 
@@ -96,9 +102,11 @@ const TaskList: React.FC = () => {
     try {
       await deleteTask(id);
       setSuccessMsg('Task deleted successfully!');
+      show('Task deleted successfully!', 'success');
       loadTasks();
     } catch (err: any) {
       setError(err.message || 'Error deleting task');
+      show(err.message || 'Error deleting task', 'error');
     }
   };
 

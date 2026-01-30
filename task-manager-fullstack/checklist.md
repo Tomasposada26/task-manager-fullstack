@@ -48,7 +48,8 @@
  [x] Clean and professional interface <!-- completed -->
 
 ## 9. Quality and Documentation
-- [x] Improve error messages and validations <!-- completed -->
-- [x] Document structure and endpoints in README <!-- completed -->
-- [x] Add diagrams (class and activity) in Markdown <!-- completed -->
-- [ ] Final checklist and best practices review
+## 10. Suggested Improvements
+- [ ] Add unit and integration tests (Jest for backend, React Testing Library for frontend)
+- [ ] Configure secure environment variables for production
+- [x] Add global error handling in frontend (notifications) <!-- completed -->
+- [ ] Add pagination for large task lists
