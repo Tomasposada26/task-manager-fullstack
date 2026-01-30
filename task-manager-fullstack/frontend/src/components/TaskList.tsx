@@ -9,6 +9,18 @@ const initialForm: Partial<Task> = {
   dueDate: '',
 };
 
+const statusColors: Record<string, string> = {
+  pending: '#fbbf24',
+  'in-progress': '#3b82f6',
+  completed: '#22c55e',
+};
+
+const priorityColors: Record<string, string> = {
+  low: '#a3e635',
+  medium: '#facc15',
+  high: '#ef4444',
+};
+
 const TaskList: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,9 +96,9 @@ const TaskList: React.FC = () => {
   };
 
   return (
-    <div>
-      <h2>My Tasks</h2>
-      <div style={{ marginBottom: 16 }}>
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: 24, background: '#fff', borderRadius: 8, boxShadow: '0 2px 8px #0001' }}>
+      <h2 style={{ textAlign: 'center', marginBottom: 24 }}>My Tasks</h2>
+      <div style={{ display: 'flex', gap: 16, marginBottom: 16, justifyContent: 'center' }}>
         <label>
           Status:
           <select value={status} onChange={e => setStatus(e.target.value)}>
@@ -96,7 +108,7 @@ const TaskList: React.FC = () => {
             <option value="completed">Completed</option>
           </select>
         </label>
-        <label style={{ marginLeft: 16 }}>
+        <label>
           Priority:
           <select value={priority} onChange={e => setPriority(e.target.value)}>
             <option value="">All</option>
@@ -106,26 +118,28 @@ const TaskList: React.FC = () => {
           </select>
         </label>
       </div>
-      <form onSubmit={handleSubmit} style={{ marginBottom: 24 }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24, alignItems: 'center', justifyContent: 'center' }}>
         <input
           name="title"
           placeholder="Title"
           value={form.title || ''}
           onChange={handleChange}
           required
+          style={{ flex: 2, minWidth: 120 }}
         />
         <input
           name="description"
           placeholder="Description"
           value={form.description || ''}
           onChange={handleChange}
+          style={{ flex: 3, minWidth: 120 }}
         />
-        <select name="status" value={form.status || 'pending'} onChange={handleChange}>
+        <select name="status" value={form.status || 'pending'} onChange={handleChange} style={{ flex: 1 }}>
           <option value="pending">Pending</option>
           <option value="in-progress">In Progress</option>
           <option value="completed">Completed</option>
         </select>
-        <select name="priority" value={form.priority || 'medium'} onChange={handleChange}>
+        <select name="priority" value={form.priority || 'medium'} onChange={handleChange} style={{ flex: 1 }}>
           <option value="low">Low</option>
           <option value="medium">Medium</option>
           <option value="high">High</option>
@@ -135,24 +149,28 @@ const TaskList: React.FC = () => {
           type="date"
           value={form.dueDate || ''}
           onChange={handleChange}
+          style={{ flex: 1 }}
         />
-        <button type="submit">{editingId ? 'Update' : 'Add'} Task</button>
-        {editingId && <button type="button" onClick={() => { setForm(initialForm); setEditingId(null); }}>Cancel</button>}
+        <button type="submit" style={{ flex: 1, minWidth: 80 }}>{editingId ? 'Update' : 'Add'} Task</button>
+        {editingId && <button type="button" onClick={() => { setForm(initialForm); setEditingId(null); }} style={{ flex: 1, minWidth: 80 }}>Cancel</button>}
         {formError && <span style={{ color: 'red', marginLeft: 8 }}>{formError}</span>}
       </form>
       {loading && <div>Loading...</div>}
       {error && <div style={{ color: 'red' }}>{error}</div>}
-      <ul>
+      <ul style={{ listStyle: 'none', padding: 0 }}>
         {tasks.map(task => (
-          <li key={task._id}>
-            <strong>{task.title}</strong> - {task.status} - {task.priority}
-            {task.dueDate && <> | Due: {new Date(task.dueDate).toLocaleDateString()}</>}
-            <button onClick={() => handleEdit(task)} style={{ marginLeft: 8 }}>Edit</button>
-            <button onClick={() => handleDelete(task._id)} style={{ marginLeft: 4 }}>Delete</button>
+          <li key={task._id} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, padding: 12, borderRadius: 6, background: '#f3f4f6', boxShadow: '0 1px 3px #0001' }}>
+            <span style={{ fontWeight: 600 }}>{task.title}</span>
+            <span style={{ color: '#6b7280' }}>{task.description}</span>
+            <span style={{ background: statusColors[task.status], color: '#fff', borderRadius: 4, padding: '2px 8px', fontSize: 12 }}>{task.status}</span>
+            <span style={{ background: priorityColors[task.priority], color: '#fff', borderRadius: 4, padding: '2px 8px', fontSize: 12 }}>{task.priority}</span>
+            {task.dueDate && <span style={{ color: '#6366f1', fontSize: 12 }}>Due: {new Date(task.dueDate).toLocaleDateString()}</span>}
+            <button onClick={() => handleEdit(task)} style={{ marginLeft: 'auto' }}>Edit</button>
+            <button onClick={() => handleDelete(task._id)} style={{ color: '#ef4444' }}>Delete</button>
           </li>
         ))}
       </ul>
-      {(!loading && tasks.length === 0) && <div>No tasks found.</div>}
+      {(!loading && tasks.length === 0) && <div style={{ textAlign: 'center', color: '#6b7280' }}>No tasks found.</div>}
     </div>
   );
 };
