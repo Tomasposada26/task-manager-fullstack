@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { setToken, getToken, removeToken } from '../utils/token';
 
 interface AuthContextType {
@@ -11,6 +11,17 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setTokenState] = useState<string | null>(getToken());
+
+  // Detectar token inválido y forzar logout si el backend responde 401
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'token' && !e.newValue) {
+        setTokenState(null);
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
   const login = (newToken: string) => {
     setToken(newToken);

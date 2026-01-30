@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { fetchTasks, createTask, updateTask, deleteTask, Task } from '../services/taskService';
+import { getToken } from '../utils/token';
+import { fetchTasks, createTask, updateTask, deleteTask, Task, PaginatedTasks } from '../services/taskService';
 import { useNotification } from '../hooks/useNotification';
 
 const initialForm: Partial<Task> = {
@@ -23,7 +24,10 @@ const priorityColors: Record<string, string> = {
 };
 
 const TaskList: React.FC = () => {
+  // Removed token check for access control
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState('');
@@ -38,10 +42,15 @@ const TaskList: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchTasks(status, priority);
-      setTasks(data);
-    } catch (err: any) {
-      setError(err.message || 'Error loading tasks');
+      const data: PaginatedTasks = await fetchTasks(status, priority, page, 10);
+      setTasks(data.tasks);
+      setTotalPages(data.totalPages);
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'message' in err) {
+        setError((err as { message?: string }).message || 'Error loading tasks');
+      } else {
+        setError('Error loading tasks');
+      }
     } finally {
       setLoading(false);
     }
@@ -50,7 +59,7 @@ const TaskList: React.FC = () => {
   useEffect(() => {
     loadTasks();
     // eslint-disable-next-line
-  }, [status, priority]);
+  }, [status, priority, page]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -78,9 +87,12 @@ const TaskList: React.FC = () => {
       setForm(initialForm);
       setEditingId(null);
       loadTasks();
-    } catch (err: any) {
-      setFormError(err.message || 'Error saving task');
-      show(err.message || 'Error saving task', 'error');
+    } catch (err: unknown) {
+      const msg = (err && typeof err === 'object' && 'message' in err)
+        ? (err as { message?: string }).message || 'Error saving task'
+        : 'Error saving task';
+      setFormError(msg);
+      show(msg, 'error');
     }
   };
 
@@ -104,9 +116,12 @@ const TaskList: React.FC = () => {
       setSuccessMsg('Task deleted successfully!');
       show('Task deleted successfully!', 'success');
       loadTasks();
-    } catch (err: any) {
-      setError(err.message || 'Error deleting task');
-      show(err.message || 'Error deleting task', 'error');
+    } catch (err: unknown) {
+      const msg = (err && typeof err === 'object' && 'message' in err)
+        ? (err as { message?: string }).message || 'Error deleting task'
+        : 'Error deleting task';
+      setError(msg);
+      show(msg, 'error');
     }
   };
 
@@ -187,6 +202,12 @@ const TaskList: React.FC = () => {
         ))}
       </ul>
       {(!loading && tasks.length === 0) && <div style={{ textAlign: 'center', color: '#6b7280' }}>No tasks found.</div>}
+      {/* Pagination controls */}
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 16 }}>
+        <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Previous</button>
+        <span>Page {page} of {totalPages}</span>
+        <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>Next</button>
+      </div>
     </div>
   );
 };

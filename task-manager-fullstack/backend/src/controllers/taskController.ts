@@ -15,9 +15,11 @@ export const createTask = async (req: AuthRequest, res: Response, next: NextFunc
 export const getTasks = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
-    const { status, priority } = req.query;
-    const tasks = await getTasksService(userId, status as string, priority as string);
-    res.json(tasks);
+    const { status, priority, page = '1', limit = '10' } = req.query;
+    const pageNum = parseInt(page as string, 10) || 1;
+    const limitNum = parseInt(limit as string, 10) || 10;
+    const result = await getTasksService(userId, status as string, priority as string, pageNum, limitNum);
+    res.json(result);
   } catch (error) {
     next(error);
   }

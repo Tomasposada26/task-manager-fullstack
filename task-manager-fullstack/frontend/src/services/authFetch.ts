@@ -1,4 +1,4 @@
-import { getToken } from '../utils/token';
+import { getToken, removeToken } from '../utils/token';
 
 export const authFetch = async (input: RequestInfo, init: RequestInit = {}) => {
   const token = getToken();
@@ -7,5 +7,11 @@ export const authFetch = async (input: RequestInfo, init: RequestInit = {}) => {
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     'Content-Type': 'application/json',
   };
-  return fetch(input, { ...init, headers });
+  const res = await fetch(input, { ...init, headers });
+  if (res.status === 401) {
+    removeToken();
+    window.location.href = '/login';
+    throw new Error('Unauthorized');
+  }
+  return res;
 };

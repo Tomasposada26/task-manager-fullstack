@@ -6,9 +6,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const morgan_1 = __importDefault(require("morgan"));
+const errorHandler_1 = require("./middlewares/errorHandler");
+const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
+const taskRoutes_1 = __importDefault(require("./routes/taskRoutes"));
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use((0, morgan_1.default)('dev'));
+app.use('/api/auth', authRoutes_1.default);
+app.use('/api/tasks', taskRoutes_1.default);
+// Global error handler
+app.use(errorHandler_1.errorHandler);
 exports.default = app;
 //# sourceMappingURL=app.js.map

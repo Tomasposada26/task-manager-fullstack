@@ -8,6 +8,7 @@ import { AuthProvider } from './hooks/useAuth';
 import { NotificationProvider } from './hooks/useNotification';
 
 const App: React.FC = () => {
+  // Eliminado: Forzar logout al cargar la app
   return (
     <AuthProvider>
       <NotificationProvider>

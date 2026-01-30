@@ -2,6 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IUser extends Document {
   email: string;
+  username: string;
   password: string;
   role: 'user' | 'admin';
   createdAt: Date;
@@ -16,6 +17,15 @@ const userSchema = new Schema<IUser>(
       unique: true,
       lowercase: true,
       trim: true,
+    },
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      minlength: 3,
+      maxlength: 32,
+      match: /^[a-zA-Z0-9_]+$/,
     },
     password: {
       type: String,

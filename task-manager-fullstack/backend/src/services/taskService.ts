@@ -11,11 +11,30 @@ export const createTaskService = async (userId: string, data: any) => {
   return task;
 };
 
-export const getTasksService = async (userId: string, status?: string, priority?: string) => {
+export const getTasksService = async (
+  userId: string,
+  status?: string,
+  priority?: string,
+  page: number = 1,
+  limit: number = 10
+) => {
   const filter: any = { user: userId };
   if (status) filter.status = status;
   if (priority) filter.priority = priority;
-  return Task.find(filter).sort({ dueDate: 1, createdAt: -1 });
+  const skip = (page - 1) * limit;
+  const [tasks, total] = await Promise.all([
+    Task.find(filter)
+      .sort({ dueDate: 1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+    Task.countDocuments(filter),
+  ]);
+  return {
+    tasks,
+    total,
+    page,
+    totalPages: Math.ceil(total / limit),
+  };
 };
 
 export const getTaskByIdService = async (userId: string, taskId: string) => {
